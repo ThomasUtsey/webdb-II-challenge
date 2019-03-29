@@ -47,16 +47,22 @@ server.get('/api/zoos', async (req, res)=>{
  const zoos = await db('zoos')
  res.status(200).json(zoos);
   }catch(error){
-    res.status(500).json(error)
+    const message = errors[error.errno] || 'Retry different value server error';
+    res.status(500).json({message, error});
   }
 });
 // list entree by id
 server.get('/api/zoos/:id', async (req, res)=>{
   try{
  const zoos = await db('zoos').where({ id: req.params.id }).first();
+ if(zoos){
  res.status(200).json(zoos)
+ }else{
+  res.status(404).json({message: 'Records not found'})
+ }
   }catch(error){
-    res.status(500).json(error)
+    const message = errors[error.errno] || 'Retry different value server error';
+    res.status(500).json({message, error});
   }
 });
 
@@ -77,7 +83,8 @@ if(result > 0) {
   res.status(404).json({message: 'Records not found'})
 }
   }catch(error){
-    res.status(500).json(error)
+    const message = errors[error.errno] || 'Retry different value server error';
+    res.status(500).json({message, error});
   }
 });
 
@@ -95,7 +102,90 @@ if(result > 0) {
   res.status(404).json({message: 'Records not found'})
 }
   }catch(error){
-    res.status(500).json(error)
+    const message = errors[error.errno] || 'Retry different value server error';
+    res.status(500).json({message, error});
+  }
+});
+// bears table handleing
+// add entree
+server.post('/api/bears',async (req, res) => {
+  try {
+    const [id] = await db('bears').insert(req.body);
+    const bear = await db('bears')
+    .where({id})
+    .first()
+    res.status(201).json(bear);
+  } catch (error) {
+    // log error to database
+    const message = errors[error.errno] || 'Retry different value server error';
+    res.status(500).json({message, error});
+  }
+  
+})
+
+// list all 
+server.get('/api/bears', async (req, res)=>{
+  try{
+ const bear = await db('bears')
+ res.status(200).json(bear);
+  }catch(error){
+    const message = errors[error.errno] || 'Retry different value server error';
+    res.status(500).json({message, error});
+  }
+});
+// list entree by id
+server.get('/api/bears/:id', async (req, res)=>{
+  try{
+ const bear = await db('bears').where({ id: req.params.id }).first();
+ if(bear){
+ res.status(200).json(bear)
+ }else{
+  res.status(404).json({message: 'Records not found'})
+ }
+  }catch(error){
+    const message = errors[error.errno] || 'Retry different value server error';
+    res.status(500).json({message, error});
+  }
+});
+
+// update an entree
+
+server.put('/api/bears/:id',async (req,res)=>{
+  try{
+ const result = await db('bears')
+ .where({ id: req.params.id })
+ .update(req.body);
+
+if(result > 0) {
+  const bear = await db('bears')
+    .where({ id: req.params.id })
+    .first();
+  res.status (200).json(bear); 
+}else{
+  res.status(404).json({message: 'Records not found'})
+}
+  }catch(error){
+    const message = errors[error.errno] || 'Retry different value server error';
+    res.status(500).json({message, error});
+  }
+});
+
+// remove an entree
+
+server.delete('/api/bears/:id',async (req,res)=>{
+  try{
+ const result = await db('bears')
+ .where({ id: req.params.id })
+ .del();
+
+if(result > 0) {
+  res.status (200).end(); 
+}else{
+  res.status(404).json({message: 'Records not found'})
+}
+  }catch(error){
+    const message = errors[error.errno] || 'Retry different value server error';
+    res.status(500).json({message, error});
   }
 });
 
